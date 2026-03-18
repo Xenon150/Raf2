@@ -420,14 +420,29 @@ local noclipEnabled = false
 local defaultSpeed  = 16
 local defaultJump   = 50
 
+-- Значения которые постоянно форсируются
+local forcedSpeed = 16
+local forcedJump  = 50
+
+-- Постоянный цикл принудительного применения скорости/прыжка
+local statsConn = RunService.Heartbeat:Connect(function()
+    pcall(function()
+        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if not hum then return end
+        if hum.WalkSpeed ~= forcedSpeed then hum.WalkSpeed = forcedSpeed end
+        if hum.JumpPower  ~= forcedJump  then
+            hum.UseJumpPower = true
+            hum.JumpPower = forcedJump
+        end
+    end)
+end)
+table.insert(getgenv().XenonConnections, statsConn)
+
 -- SPEED SLIDER
 MoveSection:AddLabel("Walk Speed"):AddSlider({
     Default = 16, Min = 16, Max = 300, Step = 1, Flag = "WalkSpeed",
     Callback = function(v)
-        pcall(function()
-            local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-            if hum then hum.WalkSpeed = v end
-        end)
+        forcedSpeed = v
     end
 })
 
@@ -435,13 +450,7 @@ MoveSection:AddLabel("Walk Speed"):AddSlider({
 MoveSection:AddLabel("Jump Power"):AddSlider({
     Default = 50, Min = 50, Max = 500, Step = 5, Flag = "JumpPower",
     Callback = function(v)
-        pcall(function()
-            local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-            if hum then
-                hum.JumpPower = v
-                hum.UseJumpPower = true
-            end
-        end)
+        forcedJump = v
     end
 })
 
@@ -563,14 +572,8 @@ MoveSection:AddLabel("Fly"):AddToggle({
 MoveSection:AddButton({
     Name = "Reset Stats", Icon = "arrow-rotate-left",
     Callback = function()
-        pcall(function()
-            local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-            if hum then
-                hum.WalkSpeed  = 16
-                hum.JumpPower  = 50
-                hum.UseJumpPower = true
-            end
-        end)
+        forcedSpeed = 16
+        forcedJump  = 50
         Logging.new("arrow-rotate-left", "Stats reset", 3)
     end
 })
