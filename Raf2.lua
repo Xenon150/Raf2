@@ -357,9 +357,34 @@ local toggleAutoSeeds = FarmSection:AddLabel("Auto Collect Seeds"):AddToggle({
     Callback = function(v) Settings.AutoSeeds = v end
 })
 
+-- ОПТИМИЗИРОВАННЫЙ ZERO CD ТОГГЛ
+local zeroCDConnection = nil
 local toggleZeroCD = FarmSection:AddLabel("0-Second Prompts"):AddToggle({
     Default = false, Flag = "ZeroCD",
-    Callback = function(v) Settings.ZeroCD = v end
+    Callback = function(v)
+        Settings.ZeroCD = v
+        if v then
+            task.spawn(function()
+                for _, obj in ipairs(workspace:GetDescendants()) do
+                    if obj:IsA("ProximityPrompt") and obj.HoldDuration > 0 then 
+                        obj.HoldDuration = 0 
+                    end
+                end
+            end)
+
+            zeroCDConnection = workspace.DescendantAdded:Connect(function(obj)
+                if Settings.ZeroCD and obj:IsA("ProximityPrompt") then
+                    obj.HoldDuration = 0
+                end
+            end)
+            table.insert(getgenv().XenonConnections, zeroCDConnection)
+        else
+            if zeroCDConnection then
+                zeroCDConnection:Disconnect()
+                zeroCDConnection = nil
+            end
+        end
+    end
 })
 
 local toggleCrystalTP = FarmSection:AddLabel("Auto Crystal Collect"):AddToggle({
@@ -660,13 +685,7 @@ task.spawn(function()
                 if raiseEvent   then raiseEvent:FireServer()   end
             end)
         end
-        if Settings.ZeroCD then
-            pcall(function()
-                for _, obj in ipairs(workspace:GetDescendants()) do
-                    if obj:IsA("ProximityPrompt") and obj.HoldDuration > 0 then obj.HoldDuration = 0 end
-                end
-            end)
-        end
+        -- ЗДЕСЬ БЫЛ СТАРЫЙ ZERO CD - УДАЛЕН ДЛЯ ОПТИМИЗАЦИИ
     end
 end)
 
