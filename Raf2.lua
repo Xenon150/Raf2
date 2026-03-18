@@ -2,24 +2,21 @@
 --  XENON RELOAD GUARD
 -- ══════════════════════════════════════════════════════════
 if getgenv().XenonLoaded then
-    if getgenv().XenonScreenGui then
-        getgenv().XenonScreenGui:Destroy()
-    end
-    if getgenv().MobileButton then
-        getgenv().MobileButton:Destroy()
-    end
+    if getgenv().XenonScreenGui then getgenv().XenonScreenGui:Destroy() end
+    if getgenv().MobileButton   then getgenv().MobileButton:Destroy()   end
 end
 getgenv().XenonLoaded = true
 
 -- ══════════════════════════════════════════════════════════
 --  СЕРВИСЫ
 -- ══════════════════════════════════════════════════════════
-local Players          = game:GetService("Players")
+local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local VirtualUser      = game:GetService("VirtualUser")
-local RunService       = game:GetService("RunService")
-local HttpService      = game:GetService("HttpService")
-local UserInputService = game:GetService("UserInputService")
+local VirtualUser       = game:GetService("VirtualUser")
+local RunService        = game:GetService("RunService")
+local HttpService       = game:GetService("HttpService")
+local UserInputService  = game:GetService("UserInputService")
+local TweenService      = game:GetService("TweenService")
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui   = LocalPlayer:WaitForChild("PlayerGui")
@@ -83,17 +80,13 @@ local function safeTouch(targetObj)
         local char = LocalPlayer.Character
         local root = char and char:FindFirstChild("HumanoidRootPart")
         if not root or not targetObj or not targetObj.Parent then return end
-
         if firetouchinterest then
             local touchPart = nil
             if targetObj:IsA("BasePart") and targetObj:FindFirstChildWhichIsA("TouchTransmitter") then
                 touchPart = targetObj
             else
                 for _, desc in ipairs(targetObj:GetDescendants()) do
-                    if desc:IsA("TouchTransmitter") then
-                        touchPart = desc.Parent
-                        break
-                    end
+                    if desc:IsA("TouchTransmitter") then touchPart = desc.Parent; break end
                 end
             end
             if touchPart and touchPart:IsDescendantOf(workspace) and touchPart:FindFirstChildWhichIsA("TouchTransmitter") then
@@ -129,122 +122,93 @@ end)
 -- ══════════════════════════════════════════════════════════
 --  KEY SYSTEM
 -- ══════════════════════════════════════════════════════════
-local VALID_KEY  = "Jkfq12lvwfwg51vdc"
+local VALID_KEY   = "Jkfq12lvwfwg51vdc"
 local GETKEY_LINK = "https://discord.gg/9Fyh42Hs"
-local hasAccess  = false
+local hasAccess   = false
 
 if not hasAccess then
-    local TweenService = game:GetService("TweenService")
-
     local gui = Instance.new("ScreenGui")
-    gui.Name = "XenonKeyUI"
+    gui.Name           = "XenonKeyUI"
     gui.IgnoreGuiInset = true
-    gui.ResetOnSpawn = false
-    gui.Parent = game.CoreGui
+    gui.ResetOnSpawn   = false
+    gui.Parent         = game.CoreGui
 
     local blur = Instance.new("BlurEffect")
-    blur.Size = 0
+    blur.Size   = 0
     blur.Parent = game.Lighting
     TweenService:Create(blur, TweenInfo.new(0.4), {Size = 20}):Play()
 
     local bg = Instance.new("Frame")
-    bg.Size = UDim2.new(1,0,1,0)
-    bg.BackgroundColor3 = Color3.fromRGB(0,0,0)
+    bg.Size                  = UDim2.new(1,0,1,0)
+    bg.BackgroundColor3      = Color3.fromRGB(0,0,0)
     bg.BackgroundTransparency = 1
-    bg.Parent = gui
+    bg.Parent                = gui
     TweenService:Create(bg, TweenInfo.new(0.4), {BackgroundTransparency = 0.4}):Play()
 
     local main = Instance.new("Frame")
-    main.Size = UDim2.new(0,0,0,0)
-    main.Position = UDim2.new(0.5,0,0.5,0)
-    main.AnchorPoint = Vector2.new(0.5,0.5)
+    main.Size             = UDim2.new(0,0,0,0)
+    main.Position         = UDim2.new(0.5,0,0.5,0)
+    main.AnchorPoint      = Vector2.new(0.5,0.5)
     main.BackgroundColor3 = Color3.fromRGB(15,15,15)
-    main.Parent = gui
+    main.Parent           = gui
     Instance.new("UICorner", main).CornerRadius = UDim.new(0,12)
-
-    local grad = Instance.new("UIGradient", main)
-    grad.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(20,20,20)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(10,10,10))
-    }
-
     TweenService:Create(main, TweenInfo.new(0.4, Enum.EasingStyle.Back), {
         Size = UDim2.new(0,340,0,220)
     }):Play()
 
-    local line = Instance.new("Frame", main)
-    line.Size = UDim2.new(1,0,0,2)
-    line.BackgroundColor3 = Color3.fromRGB(0,160,255)
-
     local title = Instance.new("TextLabel", main)
-    title.Size = UDim2.new(1,0,0,50)
+    title.Size                = UDim2.new(1,0,0,50)
     title.BackgroundTransparency = 1
-    title.Text = "XENON"
-    title.Font = Enum.Font.GothamBlack
-    title.TextSize = 20
-    title.TextColor3 = Color3.fromRGB(255,255,255)
-
-    local sub = Instance.new("TextLabel", main)
-    sub.Size = UDim2.new(1,0,0,20)
-    sub.Position = UDim2.new(0,0,0,35)
-    sub.BackgroundTransparency = 1
-    sub.Text = "Premium Access Required"
-    sub.Font = Enum.Font.Gotham
-    sub.TextSize = 12
-    sub.TextColor3 = Color3.fromRGB(130,130,130)
+    title.Text                = "XENON"
+    title.Font                = Enum.Font.GothamBlack
+    title.TextSize             = 20
+    title.TextColor3           = Color3.fromRGB(255,255,255)
 
     local input = Instance.new("TextBox", main)
-    input.Size = UDim2.new(0.8,0,0,40)
-    input.Position = UDim2.new(0.1,0,0.45,0)
+    input.Size             = UDim2.new(0.8,0,0,40)
+    input.Position         = UDim2.new(0.1,0,0.45,0)
     input.BackgroundColor3 = Color3.fromRGB(25,25,25)
-    input.Text = ""
-    input.PlaceholderText = "Enter your key..."
-    input.Font = Enum.Font.Gotham
-    input.TextSize = 14
-    input.TextColor3 = Color3.new(1,1,1)
+    input.PlaceholderText  = "Enter key..."
+    input.Text             = ""
+    input.Font             = Enum.Font.Gotham
+    input.TextSize          = 14
+    input.TextColor3        = Color3.new(1,1,1)
     Instance.new("UICorner", input).CornerRadius = UDim.new(0,10)
-    Instance.new("UIStroke", input).Color = Color3.fromRGB(40,40,40)
 
     local unlock = Instance.new("TextButton", main)
-    unlock.Size = UDim2.new(0.8,0,0,35)
-    unlock.Position = UDim2.new(0.1,0,0.68,0)
-    unlock.Text = "Unlock"
-    unlock.Font = Enum.Font.GothamBold
-    unlock.TextSize = 14
-    unlock.TextColor3 = Color3.new(1,1,1)
+    unlock.Size             = UDim2.new(0.8,0,0,35)
+    unlock.Position         = UDim2.new(0.1,0,0.68,0)
+    unlock.Text             = "Unlock"
+    unlock.Font             = Enum.Font.GothamBold
+    unlock.TextSize          = 14
+    unlock.TextColor3        = Color3.new(1,1,1)
+    unlock.BackgroundColor3  = Color3.fromRGB(0,160,255)
     Instance.new("UICorner", unlock).CornerRadius = UDim.new(0,10)
-    local unlockGrad = Instance.new("UIGradient", unlock)
-    unlockGrad.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(0,160,255)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(0,90,200))
-    }
-    Instance.new("UIStroke", unlock).Color = Color3.fromRGB(0,160,255)
 
     local getkey = Instance.new("TextButton", main)
-    getkey.Size = UDim2.new(0.8,0,0,28)
-    getkey.Position = UDim2.new(0.1,0,0.85,0)
-    getkey.Text = "Get Key"
-    getkey.Font = Enum.Font.Gotham
-    getkey.TextSize = 12
-    getkey.TextColor3 = Color3.fromRGB(200,200,200)
-    getkey.BackgroundColor3 = Color3.fromRGB(30,30,30)
+    getkey.Size             = UDim2.new(0.8,0,0,28)
+    getkey.Position         = UDim2.new(0.1,0,0.85,0)
+    getkey.Text             = "Get Key"
+    getkey.Font             = Enum.Font.Gotham
+    getkey.TextSize          = 12
+    getkey.TextColor3        = Color3.fromRGB(200,200,200)
+    getkey.BackgroundColor3  = Color3.fromRGB(30,30,30)
     Instance.new("UICorner", getkey).CornerRadius = UDim.new(0,10)
-    Instance.new("UIStroke", getkey).Color = Color3.fromRGB(60,60,60)
 
     local status = Instance.new("TextLabel", main)
-    status.Size = UDim2.new(1,0,0,18)
-    status.Position = UDim2.new(0,0,1,-18)
+    status.Size                  = UDim2.new(1,0,0,18)
+    status.Position              = UDim2.new(0,0,1,-18)
     status.BackgroundTransparency = 1
-    status.Text = ""
-    status.Font = Enum.Font.Gotham
-    status.TextSize = 12
-    status.TextColor3 = Color3.fromRGB(255,80,80)
+    status.Text                  = ""
+    status.Font                  = Enum.Font.Gotham
+    status.TextSize               = 12
+    status.TextColor3             = Color3.fromRGB(255,80,80)
 
     getkey.MouseButton1Click:Connect(function()
         if setclipboard then
             setclipboard(GETKEY_LINK)
+            status.Text      = "Link copied!"
             status.TextColor3 = Color3.fromRGB(100,255,100)
-            status.Text = "Link copied!"
         else
             status.Text = "Clipboard not supported"
         end
@@ -253,8 +217,8 @@ if not hasAccess then
     local unlocked = false
     unlock.MouseButton1Click:Connect(function()
         if input.Text == VALID_KEY then
+            status.Text      = "Access granted"
             status.TextColor3 = Color3.fromRGB(100,255,100)
-            status.Text = "Access granted"
             unlocked = true
             TweenService:Create(main, TweenInfo.new(0.3), {Size = UDim2.new(0,0,0,0)}):Play()
             task.wait(0.3)
@@ -271,21 +235,21 @@ end
 -- ══════════════════════════════════════════════════════════
 --  XENON UI
 -- ══════════════════════════════════════════════════════════
-local XenonLib   = loadstring(game:HttpGet("https://raw.githubusercontent.com/Xenon150/Xenon-GUI/refs/heads/main/GUI.lua"))()
+local XenonLib     = loadstring(game:HttpGet("https://raw.githubusercontent.com/Xenon150/Xenon-GUI/refs/heads/main/GUI.lua"))()
 local Notification = XenonLib:CreateNotification()
 local Logging      = XenonLib:CreateLogger()
 
-local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+local isMobile  = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
 local autoScale = isMobile and XenonLib.Scales.Mobile or XenonLib.Scales.Default
 
 local window = XenonLib:CreateWindow({
-    Logo        = XenonLib.GlobalLogo,
-    Name        = "Xenon",
-    Content     = "Raf2",
-    Size        = autoScale,
-    ConfigFolder = "FloppaHubConfigs",
+    Logo             = XenonLib.GlobalLogo,
+    Name             = "Xenon",
+    Content          = "Raf2",
+    Size             = autoScale,
+    ConfigFolder     = "FloppaHubConfigs",
     Enable3DRenderer = false,
-    Keybind     = "K"
+    Keybind          = "K"
 })
 
 getgenv().XenonScreenGui = XenonLib.ScreenGui
@@ -295,43 +259,38 @@ if isMobile then
     window:SetSize(XenonLib.Scales.Mobile)
 end
 
--- Скрыть кнопку редактора (если есть)
 pcall(function()
     for _, v in pairs(XenonLib.ScreenGui:GetDescendants()) do
         if v:IsA("Frame") and v:FindFirstChild("pencil-square") then v.Visible = false end
         if v:IsA("TextLabel") and v.Text == "pencil-square" then
-            local p = v.Parent
-            if p then p.Visible = false end
+            local p = v.Parent; if p then p.Visible = false end
         end
     end
 end)
 
--- Мобильная кнопка меню
 if isMobile then
     local mobileGui = Instance.new("ScreenGui")
-    mobileGui.Name = "XenonMobileButton"
+    mobileGui.Name         = "XenonMobileButton"
     mobileGui.ResetOnSpawn = false
-    mobileGui.Parent = game:GetService("CoreGui")
+    mobileGui.Parent       = game:GetService("CoreGui")
 
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 60, 0, 60)
-    btn.Position = UDim2.new(0.5, -30, 0.9, -30)
-    btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+    btn.Size                  = UDim2.new(0,60,0,60)
+    btn.Position              = UDim2.new(0.5,-30,0.9,-30)
+    btn.BackgroundColor3      = Color3.fromRGB(30,30,30)
     btn.BackgroundTransparency = 0.3
-    btn.Text = "Menu"
-    btn.TextColor3 = Color3.fromRGB(255,255,255)
-    btn.TextSize = 20
-    btn.Font = Enum.Font.SourceSansBold
-    btn.BorderSizePixel = 0
-    btn.Parent = mobileGui
+    btn.Text                  = "Menu"
+    btn.TextColor3            = Color3.fromRGB(255,255,255)
+    btn.TextSize               = 20
+    btn.Font                  = Enum.Font.SourceSansBold
+    btn.BorderSizePixel        = 0
+    btn.Parent                = mobileGui
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0,30)
 
     local dragToggle, dragStart, startPos
     btn.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.Touch then
-            dragToggle = true
-            dragStart  = input.Position
-            startPos   = btn.Position
+            dragToggle = true; dragStart = input.Position; startPos = btn.Position
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then dragToggle = false end
             end)
@@ -352,9 +311,7 @@ end
 --  ОЧИСТКА СТАРЫХ СОЕДИНЕНИЙ
 -- ══════════════════════════════════════════════════════════
 if getgenv().XenonConnections then
-    for _, c in pairs(getgenv().XenonConnections) do
-        pcall(function() c:Disconnect() end)
-    end
+    for _, c in pairs(getgenv().XenonConnections) do pcall(function() c:Disconnect() end) end
 end
 getgenv().XenonConnections = {}
 
@@ -413,49 +370,36 @@ local toggleCrystalTP = FarmSection:AddLabel("Auto Crystal Collect"):AddToggle({
 -- ══════════════════════════════════════════════════════════
 --  ВКЛАДКА: PLAYER
 -- ══════════════════════════════════════════════════════════
-local PlayerTab      = window:AddTab({ Icon = "person-running", Name = "Player" })
-local MoveSection    = PlayerTab:AddSection({ Name = "MOVEMENT" })
+local PlayerTab   = window:AddTab({ Icon = "person-running", Name = "Player" })
+local MoveSection = PlayerTab:AddSection({ Name = "MOVEMENT" })
 
-local noclipEnabled = false
-local defaultSpeed  = 16
-local defaultJump   = 50
-
--- Значения которые постоянно форсируются
 local forcedSpeed = 16
 local forcedJump  = 50
 
--- Постоянный цикл принудительного применения скорости/прыжка
 local statsConn = RunService.Heartbeat:Connect(function()
     pcall(function()
         local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
         if not hum then return end
         if hum.WalkSpeed ~= forcedSpeed then hum.WalkSpeed = forcedSpeed end
         if hum.JumpPower  ~= forcedJump  then
-            hum.UseJumpPower = true
-            hum.JumpPower = forcedJump
+            hum.UseJumpPower = true; hum.JumpPower = forcedJump
         end
     end)
 end)
 table.insert(getgenv().XenonConnections, statsConn)
 
--- SPEED SLIDER
 MoveSection:AddLabel("Walk Speed"):AddSlider({
     Default = 16, Min = 16, Max = 300, Step = 1, Flag = "WalkSpeed",
-    Callback = function(v)
-        forcedSpeed = v
-    end
+    Callback = function(v) forcedSpeed = v end
 })
 
--- JUMP POWER SLIDER
 MoveSection:AddLabel("Jump Power"):AddSlider({
     Default = 50, Min = 50, Max = 500, Step = 5, Flag = "JumpPower",
-    Callback = function(v)
-        forcedJump = v
-    end
+    Callback = function(v) forcedJump = v end
 })
 
--- NOCLIP
-local noclipConn = nil
+local noclipEnabled = false
+local noclipConn    = nil
 MoveSection:AddLabel("Noclip"):AddToggle({
     Default = false, Flag = "Noclip",
     Callback = function(v)
@@ -464,35 +408,25 @@ MoveSection:AddLabel("Noclip"):AddToggle({
             noclipConn = RunService.Stepped:Connect(function()
                 if not noclipEnabled then return end
                 pcall(function()
-                    local char = LocalPlayer.Character
-                    if not char then return end
+                    local char = LocalPlayer.Character; if not char then return end
                     for _, part in ipairs(char:GetDescendants()) do
-                        if part:IsA("BasePart") and part.CanCollide then
-                            part.CanCollide = false
-                        end
+                        if part:IsA("BasePart") and part.CanCollide then part.CanCollide = false end
                     end
                 end)
             end)
             table.insert(getgenv().XenonConnections, noclipConn)
         else
-            if noclipConn then
-                pcall(function() noclipConn:Disconnect() end)
-                noclipConn = nil
-            end
+            if noclipConn then pcall(function() noclipConn:Disconnect() end); noclipConn = nil end
             pcall(function()
-                local char = LocalPlayer.Character
-                if not char then return end
+                local char = LocalPlayer.Character; if not char then return end
                 for _, part in ipairs(char:GetDescendants()) do
-                    if part:IsA("BasePart") then
-                        part.CanCollide = true
-                    end
+                    if part:IsA("BasePart") then part.CanCollide = true end
                 end
             end)
         end
     end
 })
 
--- INFINITE JUMP
 local ijConn = nil
 MoveSection:AddLabel("Infinite Jump"):AddToggle({
     Default = false, Flag = "InfJump",
@@ -506,12 +440,11 @@ MoveSection:AddLabel("Infinite Jump"):AddToggle({
             end)
             table.insert(getgenv().XenonConnections, ijConn)
         else
-            if ijConn then pcall(function() ijConn:Disconnect() end) ijConn = nil end
+            if ijConn then pcall(function() ijConn:Disconnect() end); ijConn = nil end
         end
     end
 })
 
--- FLY
 local flyEnabled = false
 local flyConn    = nil
 local flyBV, flyBG
@@ -526,38 +459,33 @@ MoveSection:AddLabel("Fly"):AddToggle({
                 local root = char and char:FindFirstChild("HumanoidRootPart")
                 local hum  = char and char:FindFirstChildOfClass("Humanoid")
                 if not root or not hum then return end
-
                 hum.PlatformStand = true
-
                 flyBV = Instance.new("BodyVelocity", root)
                 flyBV.Velocity = Vector3.zero
                 flyBV.MaxForce = Vector3.new(1e5,1e5,1e5)
-
                 flyBG = Instance.new("BodyGyro", root)
                 flyBG.MaxTorque = Vector3.new(1e5,1e5,1e5)
                 flyBG.D = 100
-
                 local UIS    = game:GetService("UserInputService")
                 local Camera = workspace.CurrentCamera
-
                 flyConn = RunService.Heartbeat:Connect(function()
                     if not flyEnabled then return end
                     local cf  = Camera.CFrame
                     local vel = Vector3.zero
                     local spd = 50
-                    if UIS:IsKeyDown(Enum.KeyCode.W) then vel = vel + cf.LookVector * spd end
-                    if UIS:IsKeyDown(Enum.KeyCode.S) then vel = vel - cf.LookVector * spd end
-                    if UIS:IsKeyDown(Enum.KeyCode.A) then vel = vel - cf.RightVector * spd end
-                    if UIS:IsKeyDown(Enum.KeyCode.D) then vel = vel + cf.RightVector * spd end
-                    if UIS:IsKeyDown(Enum.KeyCode.Space) then vel = vel + Vector3.new(0,spd,0) end
-                    if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then vel = vel - Vector3.new(0,spd,0) end
+                    if UIS:IsKeyDown(Enum.KeyCode.W)         then vel = vel + cf.LookVector  * spd end
+                    if UIS:IsKeyDown(Enum.KeyCode.S)         then vel = vel - cf.LookVector  * spd end
+                    if UIS:IsKeyDown(Enum.KeyCode.A)         then vel = vel - cf.RightVector * spd end
+                    if UIS:IsKeyDown(Enum.KeyCode.D)         then vel = vel + cf.RightVector * spd end
+                    if UIS:IsKeyDown(Enum.KeyCode.Space)     then vel = vel + Vector3.new(0,spd,0)  end
+                    if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then vel = vel - Vector3.new(0,spd,0)  end
                     if flyBV and flyBV.Parent then flyBV.Velocity = vel end
-                    if flyBG and flyBG.Parent then flyBG.CFrame = cf end
+                    if flyBG and flyBG.Parent then flyBG.CFrame   = cf  end
                 end)
                 table.insert(getgenv().XenonConnections, flyConn)
             end)
         else
-            if flyConn then pcall(function() flyConn:Disconnect() end) flyConn = nil end
+            if flyConn then pcall(function() flyConn:Disconnect() end); flyConn = nil end
             pcall(function()
                 if flyBV and flyBV.Parent then flyBV:Destroy() end
                 if flyBG and flyBG.Parent then flyBG:Destroy() end
@@ -568,12 +496,10 @@ MoveSection:AddLabel("Fly"):AddToggle({
     end
 })
 
--- RESET STATS BUTTON
 MoveSection:AddButton({
     Name = "Reset Stats", Icon = "arrow-rotate-left",
     Callback = function()
-        forcedSpeed = 16
-        forcedJump  = 50
+        forcedSpeed = 16; forcedJump = 50
         Logging.new("arrow-rotate-left", "Stats reset", 3)
     end
 })
@@ -617,33 +543,21 @@ end
 local function applyData(data, toggles)
     if not data then return end
     local map = {
-        AutoClick   = toggles.toggleAutoClick,
-        AutoBuy     = toggles.toggleAutoBuy,
-        AutoCollect = toggles.toggleAutoCollect,
-        AutoRent    = toggles.toggleAutoRent,
-        AutoSeeds   = toggles.toggleAutoSeeds,
-        ZeroCD      = toggles.toggleZeroCD,
-        CrystalTP   = toggles.toggleCrystalTP,
-        AntiAFK     = toggles.toggleAntiAFK,
+        AutoClick = toggles.toggleAutoClick, AutoBuy = toggles.toggleAutoBuy,
+        AutoCollect = toggles.toggleAutoCollect, AutoRent = toggles.toggleAutoRent,
+        AutoSeeds = toggles.toggleAutoSeeds, ZeroCD = toggles.toggleZeroCD,
+        CrystalTP = toggles.toggleCrystalTP, AntiAFK = toggles.toggleAntiAFK,
     }
     for key, toggle in pairs(map) do
-        if data[key] ~= nil then
-            toggle:SetValue(data[key])
-        end
+        if data[key] ~= nil then toggle:SetValue(data[key]) end
     end
 end
 
 local function saveConfig(name)
-    if not name or name == "" then
-        Logging.new("triangle-exclamation", "Enter config name", 3)
-        return
-    end
+    if not name or name == "" then Logging.new("triangle-exclamation", "Enter config name", 3); return end
     ensureFolder()
     local ok, encoded = pcall(function() return HttpService:JSONEncode(getCurrentData()) end)
-    if ok then
-        writefile(CONFIG_FOLDER .. "/" .. name .. ".json", encoded)
-        Logging.new("folder", "Saved: " .. name, 3)
-    end
+    if ok then writefile(CONFIG_FOLDER .. "/" .. name .. ".json", encoded); Logging.new("folder", "Saved: " .. name, 3) end
 end
 
 local function getConfigList()
@@ -662,9 +576,7 @@ local CfgTab     = window:AddTab({ Icon = "folder", Name = "Config" })
 local CfgSection = CfgTab:AddSection({ Name = "SAVE / LOAD" })
 
 local configNameInput = CfgSection:AddLabel("Config Name"):AddTextInput({
-    Default = "", Placeholder = "Enter name...",
-    Size = 120, Flag = "ConfigName",
-    Callback = function() end
+    Default = "", Placeholder = "Enter name...", Size = 120, Flag = "ConfigName", Callback = function() end
 })
 
 CfgSection:AddButton({
@@ -675,29 +587,23 @@ CfgSection:AddButton({
 local CfgListSection = CfgTab:AddSection({ Name = "CONFIGS" })
 
 local configDropdown = CfgListSection:AddLabel("Select Config"):AddDropdown({
-    Default = nil, Values = getConfigList(),
-    AutoUpdate = true, Size = 120, Flag = "ConfigSelect",
-    Callback = function() end
+    Default = nil, Values = getConfigList(), AutoUpdate = true, Size = 120, Flag = "ConfigSelect", Callback = function() end
 })
 
 CfgListSection:AddButton({
     Name = "Load Selected", Icon = "arrow-right-from-portrait-rectangle",
     Callback = function()
         local name = configDropdown:GetValue()
-        if not name or name == "" then Logging.new("triangle-exclamation", "Select a config", 3) return end
+        if not name or name == "" then Logging.new("triangle-exclamation", "Select a config", 3); return end
         local path = CONFIG_FOLDER .. "/" .. name .. ".json"
-        if not isfile(path) then Logging.new("triangle-exclamation", "File not found", 3) return end
+        if not isfile(path) then Logging.new("triangle-exclamation", "File not found", 3); return end
         local ok, data = pcall(function() return HttpService:JSONDecode(readfile(path)) end)
-        if not ok or not data then Logging.new("triangle-exclamation", "Load error", 3) return end
+        if not ok or not data then Logging.new("triangle-exclamation", "Load error", 3); return end
         applyData(data, {
-            toggleAutoClick   = toggleAutoClick,
-            toggleAutoBuy     = toggleAutoBuy,
-            toggleAutoCollect = toggleAutoCollect,
-            toggleAutoRent    = toggleAutoRent,
-            toggleAutoSeeds   = toggleAutoSeeds,
-            toggleZeroCD      = toggleZeroCD,
-            toggleCrystalTP   = toggleCrystalTP,
-            toggleAntiAFK     = toggleAntiAFK,
+            toggleAutoClick = toggleAutoClick, toggleAutoBuy = toggleAutoBuy,
+            toggleAutoCollect = toggleAutoCollect, toggleAutoRent = toggleAutoRent,
+            toggleAutoSeeds = toggleAutoSeeds, toggleZeroCD = toggleZeroCD,
+            toggleCrystalTP = toggleCrystalTP, toggleAntiAFK = toggleAntiAFK,
         })
         Logging.new("folder", "Loaded: " .. name, 3)
     end
@@ -707,12 +613,10 @@ CfgListSection:AddButton({
     Name = "Delete Selected", Icon = "trash-can",
     Callback = function()
         local name = configDropdown:GetValue()
-        if not name or name == "" then Logging.new("triangle-exclamation", "Select a config", 3) return end
+        if not name or name == "" then Logging.new("triangle-exclamation", "Select a config", 3); return end
         local path = CONFIG_FOLDER .. "/" .. name .. ".json"
         if isfile(path) then
-            delfile(path)
-            configDropdown:SetValues(getConfigList())
-            configDropdown:SetValue(nil)
+            delfile(path); configDropdown:SetValues(getConfigList()); configDropdown:SetValue(nil)
             Logging.new("trash-can", "Deleted: " .. name, 3)
         end
     end
@@ -726,42 +630,28 @@ CfgListSection:AddButton({
     end
 })
 
--- ══════════════════════════════════════════════════════════
---  НАСТРОЙКИ МЕНЮ (keybind + scale)
--- ══════════════════════════════════════════════════════════
 window.UserSettings:AddLabel("Menu Keybind"):AddKeybind({
     Default = "K",
-    Callback = function(v)
-        window.Keybind = v
-        Logging.new("ps4-touchpad", "Keybind: " .. tostring(v), 5)
-    end,
+    Callback = function(v) window.Keybind = v; Logging.new("ps4-touchpad", "Keybind: " .. tostring(v), 5) end,
 })
 
 window.UserSettings:AddLabel("Menu Scale"):AddDropdown({
     Default = isMobile and "Mobile" or "Default",
-    Values = {"Default", "Large", "Mobile", "Small"},
-    Callback = function(v)
-        window:SetSize(XenonLib.Scales[v])
-        Logging.new("crop", "Scale: " .. tostring(v), 5)
-    end,
+    Values  = {"Default", "Large", "Mobile", "Small"},
+    Callback = function(v) window:SetSize(XenonLib.Scales[v]); Logging.new("crop", "Scale: " .. tostring(v), 5) end,
 })
 
 -- ══════════════════════════════════════════════════════════
 --  ИГРОВЫЕ ЦИКЛЫ
 -- ══════════════════════════════════════════════════════════
-
--- 1. БЫСТРЫЙ ЦИКЛ (AutoClick, AutoRent, ZeroCD)
 task.spawn(function()
     while task.wait(0.1) do
-        -- AUTO CLICK
         if Settings.AutoClick then
             pcall(function()
                 local cd = workspace:FindFirstChild("Floppa") and workspace.Floppa:FindFirstChild("ClickDetector")
                 if cd then fireclickdetector(cd) end
             end)
         end
-
-        -- AUTO RENT
         if Settings.AutoRent then
             pcall(function()
                 local collectEvent = Events:FindFirstChild("Collect Rent")
@@ -770,133 +660,84 @@ task.spawn(function()
                 if raiseEvent   then raiseEvent:FireServer()   end
             end)
         end
-
-        -- ZERO CD
         if Settings.ZeroCD then
             pcall(function()
                 for _, obj in ipairs(workspace:GetDescendants()) do
-                    if obj:IsA("ProximityPrompt") and obj.HoldDuration > 0 then
-                        obj.HoldDuration = 0
-                    end
+                    if obj:IsA("ProximityPrompt") and obj.HoldDuration > 0 then obj.HoldDuration = 0 end
                 end
             end)
         end
     end
 end)
 
--- 2. AUTO SEEDS
 task.spawn(function()
     while task.wait(1) do
         if Settings.AutoSeeds then
             pcall(function()
-                local seedsFolder = workspace:FindFirstChild("Seeds")
-                if not seedsFolder then return end
-
+                local seedsFolder = workspace:FindFirstChild("Seeds"); if not seedsFolder then return end
                 local char = LocalPlayer.Character
-                local root = char and char:FindFirstChild("HumanoidRootPart")
-                if not root then return end
-
+                local root = char and char:FindFirstChild("HumanoidRootPart"); if not root then return end
                 local originalCFrame = root.CFrame
-                local collectedAny = false
-
+                local collectedAny   = false
                 for _, seed in ipairs(seedsFolder:GetChildren()) do
                     if not Settings.AutoSeeds then break end
                     if seed.Name == "Seed" and seed:IsA("BasePart") then
                         local prompt = seed:FindFirstChildWhichIsA("ProximityPrompt")
                         if prompt and prompt.Enabled then
-                            root.CFrame = seed.CFrame + Vector3.new(0, 2, 0)
-                            task.wait(0.2)
-                            if fireproximityprompt then
-                                fireproximityprompt(prompt)
-                            else
-                                prompt.HoldDuration = 0
-                                prompt:InputHoldBegin()
-                                task.wait(0.1)
-                                prompt:InputHoldEnd()
-                            end
-                            task.wait(0.1)
-                            collectedAny = true
+                            root.CFrame = seed.CFrame + Vector3.new(0,2,0); task.wait(0.2)
+                            if fireproximityprompt then fireproximityprompt(prompt)
+                            else prompt.HoldDuration = 0; prompt:InputHoldBegin(); task.wait(0.1); prompt:InputHoldEnd() end
+                            task.wait(0.1); collectedAny = true
                         end
                     end
                 end
-
                 if collectedAny and root then root.CFrame = originalCFrame end
             end)
         end
     end
 end)
 
--- 3. AUTO CRYSTAL COLLECT
 task.spawn(function()
     while task.wait(1) do
         if Settings.CrystalTP then
             pcall(function()
-                local unlocks      = workspace:FindFirstChild("Unlocks")
-                local wormhole     = unlocks and unlocks:FindFirstChild("Wormhole Machine")
-                local crystalFolder = wormhole and (
-                    wormhole:FindFirstChild("Crystal") or
-                    wormhole:FindFirstChild("Crystals")
-                )
+                local unlocks       = workspace:FindFirstChild("Unlocks")
+                local wormhole      = unlocks and unlocks:FindFirstChild("Wormhole Machine")
+                local crystalFolder = wormhole and (wormhole:FindFirstChild("Crystal") or wormhole:FindFirstChild("Crystals"))
                 if not crystalFolder then return end
-
                 local char = LocalPlayer.Character
-                local root = char and char:FindFirstChild("HumanoidRootPart")
-                if not root then return end
-
-                local originalCFrame = root.CFrame
-                local collectedAny = false
-
+                local root = char and char:FindFirstChild("HumanoidRootPart"); if not root then return end
+                local originalCFrame = root.CFrame; local collectedAny = false
                 for _, obj in ipairs(crystalFolder:GetChildren()) do
                     if not Settings.CrystalTP then break end
                     local part   = obj:IsA("BasePart") and obj or obj:FindFirstChildWhichIsA("BasePart")
                     if not part then continue end
                     local prompt = obj:FindFirstChildWhichIsA("ProximityPrompt", true)
-
-                    root.CFrame = part.CFrame + Vector3.new(0, 2, 0)
-                    task.wait(0.2)
-
+                    root.CFrame = part.CFrame + Vector3.new(0,2,0); task.wait(0.2)
                     if prompt and prompt.Enabled then
-                        if fireproximityprompt then
-                            fireproximityprompt(prompt)
-                        else
-                            prompt.HoldDuration = 0
-                            prompt:InputHoldBegin()
-                            task.wait(0.1)
-                            prompt:InputHoldEnd()
-                        end
-                    else
-                        safeTouch(part)
-                    end
-                    task.wait(0.1)
-                    collectedAny = true
+                        if fireproximityprompt then fireproximityprompt(prompt)
+                        else prompt.HoldDuration = 0; prompt:InputHoldBegin(); task.wait(0.1); prompt:InputHoldEnd() end
+                    else safeTouch(part) end
+                    task.wait(0.1); collectedAny = true
                 end
-
                 if collectedAny and root then root.CFrame = originalCFrame end
             end)
         end
     end
 end)
 
--- 4. AUTO COLLECT — новые дропы
 local dropConn = workspace.DescendantAdded:Connect(function(obj)
-    if Settings.AutoCollect then
-        task.wait(0.1)
-        if isValidDrop(obj) then safeTouch(obj) end
-    end
+    if Settings.AutoCollect then task.wait(0.1); if isValidDrop(obj) then safeTouch(obj) end end
 end)
 table.insert(getgenv().XenonConnections, dropConn)
 
--- 4b. AUTO COLLECT — сканирование каждые 3 сек
 task.spawn(function()
     while task.wait(3) do
         if Settings.AutoCollect then
             pcall(function()
                 for _, obj in ipairs(workspace:GetDescendants()) do
                     if obj:FindFirstChildWhichIsA("TouchTransmitter") then
-                        if isValidDrop(obj) then
-                            safeTouch(obj)
-                            task.wait(0.01)
-                        end
+                        if isValidDrop(obj) then safeTouch(obj); task.wait(0.01) end
                     end
                 end
             end)
@@ -904,25 +745,18 @@ task.spawn(function()
     end
 end)
 
--- 5. SMART AUTO BUY
 task.spawn(function()
     while task.wait(0.5) do
         if not Settings.AutoBuy then continue end
-
-        local unlocksFolder = workspace:FindFirstChild("Unlocks")
-        if not unlocksFolder then continue end
-
+        local unlocksFolder = workspace:FindFirstChild("Unlocks"); if not unlocksFolder then continue end
         local money, gold = getWallet()
         local toBuy = {}
-
         for itemName, itemData in pairs(ShopData) do
             if PERMANENT_BLACKLIST[itemName] then continue end
             if not unlocksFolder:FindFirstChild(itemName) then
                 local canUnlock = true
                 if itemData.Requirement then
-                    if not unlocksFolder:FindFirstChild(itemData.Requirement.Unlock) then
-                        canUnlock = false
-                    end
+                    if not unlocksFolder:FindFirstChild(itemData.Requirement.Unlock) then canUnlock = false end
                 end
                 if canUnlock then
                     local isGold = itemData.Gold or false
@@ -933,9 +767,7 @@ task.spawn(function()
                 end
             end
         end
-
         table.sort(toBuy, function(a, b) return a.price < b.price end)
-
         for _, upgrade in ipairs(toBuy) do
             if not Settings.AutoBuy then break end
             local unlockEvent = Events:FindFirstChild("Unlock")
@@ -949,7 +781,7 @@ end)
 --  УВЕДОМЛЕНИЕ О ЗАПУСКЕ
 -- ══════════════════════════════════════════════════════════
 Notification.new({
-    Title   = "Xenon",
-    Content = "Loaded | " .. (isMobile and "Mobile (button added)" or "PC — press K"),
+    Title    = "Xenon",
+    Content  = "Loaded | " .. (isMobile and "Mobile (button added)" or "PC — press K"),
     Duration = 5,
 })
