@@ -103,6 +103,10 @@ end
 local function isValidDrop(obj)
     if not obj or not obj.Parent then return false end
     if not obj:IsA("BasePart") then return false end
+    
+    -- Игнорируем Workspace.Poop и объекты с именем Poop
+    if obj.Name == "Poop" or obj.Parent.Name == "Poop" then return false end
+    
     if obj.Name == "Baseplate" or obj.Name == "Grass" then return false end
     if obj.Parent:FindFirstChild("Humanoid") then return false end
     return true
